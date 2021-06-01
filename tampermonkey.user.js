@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Google Chat thread links & quote reply
-// @version      0.0.2
+// @version      0.0.3
 // @updateURL    https://raw.githubusercontent.com/teejay-87/gchat-copy/master/tampermonkey.meta.js
 // @downloadURL  https://raw.githubusercontent.com/teejay-87/gchat-copy/master/tampermonkey.user.js
 // @description  Adds button to copy links to threads on Google Chat and adds button to messages to quote reply
-// @author       upman
+// @author       upman, teejay-87
 // @include      https://chat.google.com/*
 // @grant        none
 // @run-at       document-idle
@@ -262,7 +262,7 @@
         var messageTime = time.getHours().toString().padStart(2, "0") + ":" + time.getMinutes().toString().padStart(2, "0");
         var today = new Date();
         if (time.getDay() != today.getDay() || time.getMonth() != today.getMonth()) {
-            messageTime += ", " + time.getDate().toString().padStart(2, "0") + "/" + (today.getMonth() + 1).toString().padStart(2, "0") + "/" + (today.getYear() + 1900);
+            messageTime += ", " + time.getDate().toString().padStart(2, "0") + "/" + (time.getMonth() + 1).toString().padStart(2, "0") + "/" + (time.getYear() + 1900);
         }
 
         var selection = window.getSelection().toString();
