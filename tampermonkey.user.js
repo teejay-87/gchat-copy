@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Google Chat thread links & quote reply
-// @version      0.0.3
+// @version      0.0.4
 // @updateURL    https://raw.githubusercontent.com/teejay-87/gchat-copy/master/tampermonkey.meta.js
 // @downloadURL  https://raw.githubusercontent.com/teejay-87/gchat-copy/master/tampermonkey.user.js
 // @description  Adds button to copy links to threads on Google Chat and adds button to messages to quote reply
@@ -11,6 +11,16 @@
 // ==/UserScript==
 
 ; (function () {
+
+    // Bypass XSS checks: threads and messages are now loaded in an IFRAME inside a window on different domain (mail.google.com)
+    // Cfr. https://stackoverflow.com/questions/61964265/getting-error-this-document-requires-trustedhtml-assignment-in-chrome
+    var newHtmlPolicy;
+    if (window.trustedTypes && window.trustedTypes.createPolicy) {
+        newHtmlPolicy = window.trustedTypes.createPolicy("newHtmlPolicy", {
+            createHTML: (string) => string
+        })
+    }
+
     function addStyle() {
         var styleElement = document.createElement('style', { type: 'text/css'});
         styleElement.appendChild(document.createTextNode(`
@@ -140,9 +150,9 @@
                     // Adding copy thread link buttons to thread
                     var copyButton = document.createElement("div");
                     copyButton.className="gchat-xtra-copy";
-                    copyButton.innerHTML = `
+                    copyButton.innerHTML = newHtmlPolicy.createHTML(`
                             Copy thread link
-                        `;
+                        `);
                     copyButton.addEventListener('click', function() {
                         const el = document.createElement('textarea');
                         const roomId = window.location.pathname.match(/\/room\/([^\?\/]*)/)[1];
@@ -188,10 +198,10 @@
                         }
                         const container = document.createElement('div');
                         // Quote svg icon
-                        container.innerHTML = `
+                        container.innerHTML = newHtmlPolicy.createHTML(`
                                 <svg viewBox="0 0 24 24" width="24px" height="24px" xmlns="http://www.w3.org/2000/svg" style="margin-top: 4px">
                                     <path d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm0 8v3.701c0 2.857-1.869 4.779-4.5 5.299l-.498-1.063c1.219-.459 2.001-1.822 2.001-2.929h-2.003v-5.008h5zm6 0v3.701c0 2.857-1.869 4.779-4.5 5.299l-.498-1.063c1.219-.459 2.001-1.822 2.001-2.929h-2.003v-5.008h5z"/>
-                                </svg>`;
+                                </svg>`);
                         container.className=addreactionButton.className;
                         container.setAttribute('data-tooltip', 'Quote Message');
                         const quoteSVG = container.children[0]
@@ -240,7 +250,7 @@
                                     return;
                                 }
 
-                                inputEl.innerHTML = makeInputText(name, time, quoteText, inputEl, messageContainer);
+                                inputEl.innerHTML = newHtmlPolicy.createHTML(makeInputText(name, time, quoteText, inputEl, messageContainer));
                                 inputEl.scrollIntoView();
                                 inputEl.click();
                                 placeCaretAtEnd(inputEl);
